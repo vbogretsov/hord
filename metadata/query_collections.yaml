@@ -1,0 +1,19 @@
+- name: allowed-queries
+  definition:
+    queries:
+    - name: getUserClaims
+      query: |
+        query getUserClaims($id: String!) {
+          users_by_pk(id: $id) {
+            claims
+          }
+        }
+    - name: createUser
+      query: |
+        mutation createUser($id: String!, $data: jsonb!, $claims: jsonb = ["user"]) {
+          insert_users_one(object: {id: $id, data: $data, claims: $claims}, on_conflict: {constraint: users_pkey, update_columns: id}) {
+            id
+            data
+            claims
+          }
+        }

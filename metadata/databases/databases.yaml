@@ -1,0 +1,35 @@
+- name: default
+  kind: postgres
+  configuration:
+    connection_info:
+      database_url:
+        from_env: HASURA_GRAPHQL_DATABASE_URL
+      use_prepared_statements: true
+      isolation_level: read-committed
+      pool_settings:
+        idle_timeout: 180
+        max_connections: 1024
+        retries: 1
+        connection_lifetime: 600
+  tables:
+  - table:
+      schema: public
+      name: users
+    select_permissions:
+    - role: backend
+      permission:
+        check: {}
+        backend_only: true
+        columns:
+        - id
+        - data
+        filter: {}
+    insert_permissions:
+    - role: backend
+      permission:
+        check: {}
+        backend_only: true
+        columns:
+        - id
+        - data
+        filter: {}
