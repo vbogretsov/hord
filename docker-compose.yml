@@ -5,7 +5,6 @@ services:
   db:
     image: postgres:13
     container_name: hord-db
-    command: ["postgres", "-N", "1024", "-c", "shared_buffers=4GB"]
     ports:
     - 5432:5432
     environment:
@@ -14,6 +13,8 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
+      HASURA_GRAPHQL_ADMIN_SECRET: ${{ secrets.HASURA_GRAPHQL_ADMIN_SECRET }}
+
     volumes:
     - ./.local/db:/docker-entrypoint-initdb.d
     - data:/var/lib/postgresql/data
@@ -24,11 +25,11 @@ services:
     container_name: hord
     hostname: hord
     ports:
-    - 8000:8080
+    - 8080:8080
     environment:
     - HASURA_GRAPHQL_DATABASE_URL=${HASURA_GRAPHQL_DATABASE_URL}
     - HASURA_GRAPHQL_METADATA_DATABASE_URL=${HASURA_GRAPHQL_METADATA_DATABASE_URL}
-    - HASURA_GRAPHQL_ENABLE_CONSOLE=true
+    - HASURA_GRAPHQL_ENABLE_CONSOLE=false
     - HASURA_GRAPHQL_ADMIN_SECRET=${HORD_SECRET_KEY}
     - HASURA_GRAPHQL_JWT_SECRET=${HASURA_GRAPHQL_JWT_SECRET}
     volumes:

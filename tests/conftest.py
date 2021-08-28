@@ -61,7 +61,25 @@ def env():
 
 
 @pytest.fixture(scope="session")
-def seed(request, env):
+def app(env):
+    host = env["url"]
+
+    n = 60
+    while n > 0:
+        try:
+            resp = requests.get(f"{host}/healthz")
+            if resp.status_code == 200:
+                return host
+        except:
+            time.sleep(1)
+            n -= 1
+
+    if n == 0:
+        pytest.exit(f"unable tp connect test server {host}")
+
+
+@pytest.fixture(scope="session")
+def seed(request, env, app):
     def exec(sql):
         conn = psycopg2.connect(env["dsn"])
         try:
@@ -87,38 +105,15 @@ def seed(request, env):
 
 
 @pytest.fixture(scope="session")
-def app(env, seed):
-    host = env["url"]
-
-    n = 10
-    while n > 0:
-        try:
-            resp = requests.get(f"{host}/healthz")
-            if resp.status_code == 200:
-                return host
-        except:
-            time.sleep(1)
-            n -= 1
-
-    if n == 0:
-        pytest.exit(f"unable tp connect test server {host}")
-
-
-@pytest.fixture(scope="session")
 def issuer(env):
     return lambda token: jwt.encode(token, env["jwt"]["key"], env["jwt"]["type"])
 
 
 @pytest.fixture(scope="session")
-def admin(app, issuer):
+def admin(app, seed, issuer):
     return session(app, issuer(datasets.TOKENS["admin"]))
 
 
 @pytest.fixture(scope="session")
-def user(app, issuer):
+def user(app, seed, issuer):
     return session(app, issuer(datasets.TOKENS["user"]))
-
-
-@pytest.fixture(scope="session")
-def guest(app):
-    return session(app, None)
