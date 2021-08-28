@@ -1,0 +1,54 @@
+[
+  {
+    "id": "1000000",
+    "data": {
+      "first_name": "Don",
+      "last_name": "Knuth"
+    },
+    "claims": {
+      "hasura": {
+          "x-hasura-allowed-roles": ["admin"],
+          "x-hasura-default-role": "admin",
+      }
+    }
+  },
+  {
+    "id": "1000001",
+    "data": {
+      "first_name": "Ken",
+      "last_name": "Thompson"
+    },
+    "claims": {
+      "hasura": {
+          "x-hasura-allowed-roles": ["user"],
+          "x-hasura-default-role": "user",
+      }
+    }
+  },
+  {
+    "id": "1000002",
+    "data": {
+      "first_name": "Dennis",
+      "last_name": "Ritchie"
+    },
+    "claims": {
+      "hasura": {
+          "x-hasura-allowed-roles": ["user"],
+          "x-hasura-default-role": "user",
+      }
+    }
+  },
+  {
+    "id": "1000003",
+    "data": {
+      "first_name": "Sergey",
+      "last_name": "Lebedev"
+    },
+    "claims": {
+      "hasura": {
+          "x-hasura-allowed-roles": ["user"],
+          "x-hasura-default-role": "user",
+      }
+    }
+  }
+]
