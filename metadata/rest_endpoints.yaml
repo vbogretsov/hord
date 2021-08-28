@@ -1,0 +1,18 @@
+- name: getUserClaims
+  comment: Get claims of a user with the ID proivded
+  url: claims
+  methods:
+  - GET
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: getUserClaims
+- name: createUser
+  comment: Create a new user
+  url: users
+  methods:
+  - POST
+  definition:
+    query:
+      collection_name: allowed-queries
+      query_name: createUser

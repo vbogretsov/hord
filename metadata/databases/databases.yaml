@@ -1,0 +1,42 @@
+- name: default
+  kind: postgres
+  configuration:
+    connection_info:
+      database_url:
+        from_env: HASURA_GRAPHQL_DATABASE_URL
+      use_prepared_statements: true
+      isolation_level: read-committed
+      pool_settings:
+        idle_timeout: 180
+        max_connections: 1024
+        retries: 1
+        connection_lifetime: 600
+  tables:
+  - table:
+      schema: public
+      name: users
+    computed_fields:
+    - name: claims
+      definition:
+        function:
+          schema: public
+          name: user_claims
+    select_permissions:
+    - role: user
+      permission:
+        check: null
+        columns:
+        - id
+        - data
+        filter:
+          id:
+            _eq: X-Hasura-User-Id
+    update_permissions:
+    - role: user
+      permission:
+        check: null
+        columns:
+        - data
+        filter:
+          id:
+            _eq: X-Hasura-User-Id
