@@ -64,7 +64,7 @@ def env():
 def app(env):
     host = env["url"]
 
-    n = 20
+    n = 60
     while n > 0:
         try:
             resp = requests.get(f"{host}/healthz")
