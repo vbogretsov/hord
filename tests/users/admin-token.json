@@ -1,9 +1,0 @@
-{
-  "iss": "https://example.org",
-  "iat": 1629800000,
-  "sub": "1000000",
-  "hasura": {
-      "x-hasura-allowed-roles": ["admin"],
-      "x-hasura-default-role": "admin",
-  },
-}

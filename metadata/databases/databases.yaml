@@ -15,21 +15,28 @@
   - table:
       schema: public
       name: users
+    computed_fields:
+    - name: claims
+      definition:
+        function:
+          schema: public
+          name: user_claims
     select_permissions:
-    - role: backend
+    - role: user
       permission:
-        check: {}
-        backend_only: true
+        check: null
         columns:
         - id
         - data
-        filter: {}
-    insert_permissions:
-    - role: backend
+        filter:
+          id:
+            _eq: X-Hasura-User-Id
+    update_permissions:
+    - role: user
       permission:
-        check: {}
-        backend_only: true
+        check: null
         columns:
-        - id
         - data
-        filter: {}
+        filter:
+          id:
+            _eq: X-Hasura-User-Id

@@ -10,10 +10,10 @@
         }
     - name: createUser
       query: |
-        mutation createUser($id: String!, $data: jsonb!, $claims: jsonb = ["user"]) {
-          insert_users_one(object: {id: $id, data: $data, claims: $claims}, on_conflict: {constraint: users_pkey, update_columns: id}) {
+        mutation createUser($id: String!, $data: jsonb!, $roles: jsonb = ["user"]) {
+          insert_users_one(object: {id: $id, data: $data, roles: $roles}, on_conflict: {constraint: users_pkey, update_columns: id}) {
             id
             data
-            claims
+            roles
           }
         }

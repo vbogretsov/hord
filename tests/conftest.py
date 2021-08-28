@@ -1,84 +1,45 @@
-import datetime
+import datasets
 import json
 import jwt
+import os
+import psycopg2
 import pytest
 import requests
-import os
+import schema
 import time
 
+from requests_toolbelt import sessions
 
-HASURA_DOCS = "https://hasura.io/docs/latest/graphql/core/deployment/graphql-engine-flags/reference.html HASURA_GRAPHQL_JWT_SECRET"
 
-USERS = [
-    {
-        "id": "100000000",
-        "data": {
-            "first_name": "Don",
-            "last_name": "Knuth",
-        },
-        "claims": {
-            "hasura": {
-                "x-hasura-allowed-roles": ["admin"],
-                "x-hasura-default-role": ["admin"],
-            }
-        }
+ENV = {
+    "TEST_URL": {
+        "name": "url",
+        "required": True,
+        "help": "Test server URL.",
+        "schema": schema.Schema(str),
     },
-    {
-        "id": "100000001",
-        "data": {
-            "first_name": "Ken",
-            "last_name": "Thompson",
-        },
-        "claims": {
-            "hasura": {
-                "x-hasura-allowed-roles": ["admin"],
-                "x-hasura-default-role": ["admin"],
-            }
-        }
+    "TEST_DSN": {
+        "name": "dsn",
+        "required": True,
+        "help": "Test database DSN.",
+        "schema": schema.Schema(str),
+        
     },
-    {
-        "id": "100000002",
-        "data": {
-            "first_name": "Dennis",
-            "last_name": "Ritchie",
-        },
-        "claims": {
-            "hasura": {
-                "x-hasura-allowed-roles": ["user"],
-                "x-hasura-default-role": ["user"],
-            }
-        }
+    "HASURA_GRAPHQL_JWT_SECRET": {
+        "name": "jwt",
+        "required": True,
+        "help": "Hasura JWT token config, more details in the docs: https://hasura.io/docs/latest/graphql/core/deployment/graphql-engine-flags/reference.html",
+        "schema": schema.Schema(schema.And(str, schema.Use(json.loads), schema.Schema({
+            "key": schema.And(str),
+            "type": schema.And(str),
+            "claims_namespace": schema.And(str),
+        }))),
     },
-    {
-        "id": "100000003",
-        "data": {
-            "first_name": "Rob",
-            "last_name": "Pike",
-        },
-        "claims": {
-            "hasura": {
-                "x-hasura-allowed-roles": ["user"],
-                "x-hasura-default-role": ["user"],
-            }
-        }
-    },
-]
+}
 
 
-def ensure_prop(conf, name):
-    if not conf.get(name, None):
-        raise ValueError(f"missing property {name} in jwt config, see {HASURA_DOCS} for more details")
-
-
-def env(name):
-    v = os.getenv(name, None)
-    if not v:
-        raise ValueError(f"environment variable {name} is not set")
-    return v
-
-
-def session(token):
-    s = requests.Session()
+def session(base_url, token):
+    s = sessions.BaseUrlSession(base_url=base_url)
     s.headers["Content-Type"] = "application/json; charset=utf-8"
     if token:
         s.headers["Authorization"] = f"Bearer {token}"
@@ -86,83 +47,78 @@ def session(token):
 
 
 @pytest.fixture(scope="session")
-def issue():
-    conf = json.loads(env("HASURA_GRAPHQL_JWT_SECRET"))
-    ensure_prop(conf, "key")
-    ensure_prop(conf, "type")
-    ensure_prop(conf, "claims_namespace")
-
-    def fn(sub, role):
-        return jwt.encode(
-            {
-                "iss": "https://example.org",
-                "iat": int(time.time()),
-                "sub": sub,
-                conf["claims_namespace"]: {
-                    "x-hasura-allowed-roles": [role],
-                    "x-hasura-default-role": role,
-                },
-            },
-            conf["key"],
-            conf["type"],
-        )
-
-    return fn
+def env():
+    env = {}
+    for name, meta in ENV.items():
+        val = os.environ.get(name, None)
+        if val is None and meta["required"]:
+            pytest.exit(f"required environment variable is not set: {name}")
+        try:
+            env[meta["name"]] = meta["schema"].validate(val)
+        except schema.SchemaError as e:
+            pytest.exit(f"unable to parse environment variable {name}: {e}")
+    return env
 
 
 @pytest.fixture(scope="session")
-def admin_token(issue):
-    return issue("admin@example.org", "admin")
+def seed(request, env):
+    def exec(sql):
+        conn = psycopg2.connect(env["dsn"])
+        try:
+            with conn:
+                with conn.cursor() as curs:
+                    curs.execute(sql)
+        finally:
+            conn.close()
+
+    def to_sql(user):
+        uid = user["id"]
+        data = json.dumps(user["data"])
+        roles = json.dumps(user["roles"])
+        return f"('{uid}', '{data}', '{roles}')"
+
+    vals = "\n,".join(to_sql(u) for u in datasets.USERS)
+    exec(f"INSERT INTO users(id, data, roles) VALUES {vals};")
+
+    def fin():
+        exec("DELETE FROM users;")
+
+    request.addfinalizer(fin)
 
 
 @pytest.fixture(scope="session")
-def user_token(issue):
-    return issue("user@example.org", "user")
+def app(env, seed):
+    host = env["url"]
+
+    n = 10
+    while n > 0:
+        try:
+            resp = requests.get(f"{host}/healthz")
+            if resp.status_code == 200:
+                return host
+        except:
+            time.sleep(1)
+            n -= 1
+
+    if n == 0:
+        pytest.exit(f"unable tp connect test server {host}")
 
 
 @pytest.fixture(scope="session")
-def admin(admin_token):
-    return session(admin_token)
+def issuer(env):
+    return lambda token: jwt.encode(token, env["jwt"]["key"], env["jwt"]["type"])
 
 
 @pytest.fixture(scope="session")
-def user(user_token):
-    return session(user_token)
+def admin(app, issuer):
+    return session(app, issuer(datasets.TOKENS["admin"]))
 
 
 @pytest.fixture(scope="session")
-def guest():
-    return session(None)
+def user(app, issuer):
+    return session(app, issuer(datasets.TOKENS["user"]))
 
 
 @pytest.fixture(scope="session")
-def endpoint(admin):
-    retry = 10
-    host = env("HASURA_GRAPHQL_ENDPOINT")
-
-    query = """
-    mutation CreateUsers {{
-        insert_users(objects: {0})
-    }}
-    """.format(USERS)
-
-    while retry > 0:
-        resp = admin.post(f"{host}/v1/graphql", json={"query": query})
-        if resp.status_code == 200:
-            return host
-
-        time.sleep(1)
-        retry -= 1
-
-    raise ValueError(f"endpoint {host} is unreachable")
-
-
-@pytest.fixture
-def user_1():
-    return {
-        "id": "123456",
-        "data": {
-            "first_name": "Adi",
-            "last_name": "Shamir",
-        },
-    }
+def guest(app):
+    return session(app, None)
