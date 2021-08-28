@@ -70,7 +70,8 @@ def app(env):
             resp = requests.get(f"{host}/healthz")
             if resp.status_code == 200:
                 return host
-        except:
+        except Exception as ex:
+            print(f"unable to connect app: {ex}")
             time.sleep(1)
             n -= 1
 
