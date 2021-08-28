@@ -34,7 +34,7 @@ jobs:
     - name: Install Test Dependencies
       run: python -m pip install -r tests/requirements.txt
     - name: Run Tests
-      run: pytest
+      run: pytest -v
       env:
         TEST_URL: http://localhost:8080
         TEST_DSN: postgres://${{ secrets.DB_NAME }}:${{ secrets.DB_PASS }}@localhost/hord?sslmode=disable
