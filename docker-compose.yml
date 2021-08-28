@@ -13,7 +13,6 @@ services:
     - DB_NAME=${DB_NAME}
     - DB_USER=${DB_USER}
     - DB_PASS=${DB_PASS}
-    - HASURA_GRAPHQL_ADMIN_SECRET=${{ secrets.HASURA_GRAPHQL_ADMIN_SECRET }}
     volumes:
     - ./.local/db:/docker-entrypoint-initdb.d
     - data:/var/lib/postgresql/data
