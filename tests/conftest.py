@@ -64,14 +64,13 @@ def env():
 def app(env):
     host = env["url"]
 
-    n = 60
+    n = 20
     while n > 0:
         try:
             resp = requests.get(f"{host}/healthz")
             if resp.status_code == 200:
                 return host
-        except Exception as ex:
-            print(f"unable to connect app: {ex}")
+        except:
             time.sleep(1)
             n -= 1
 
