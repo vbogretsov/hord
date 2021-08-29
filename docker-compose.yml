@@ -36,18 +36,5 @@ services:
     depends_on:
     - db
 
-  tests:
-    image: tests
-    build: tests
-    container_name: hord-tests
-    environment:
-    - TEST_DSN=${HASURA_GRAPHQL_DATABASE_URL}
-    - TEST_URL=http://hord:8080
-    - HASURA_GRAPHQL_JWT_SECRET=${HASURA_GRAPHQL_JWT_SECRET}
-    volumes:
-    - ./tests:/src
-    depends_on:
-    - hord
-
 volumes:
   data: {}
