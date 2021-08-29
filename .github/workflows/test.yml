@@ -42,8 +42,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Debug
-      run: pwd
-    - name: Install dependencies
-      run: pip install -r tests/requirements.txt
-    - name: Run tests
-      run: pytest
+      run: for i in $(seq 1 50); do docker ps && sleep 1; done
+    # - name: Debug
+    #   run: pwd
+    # - name: Install dependencies
+    #   run: pip install -r tests/requirements.txt
+    # - name: Run tests
+    #   run: pytest
