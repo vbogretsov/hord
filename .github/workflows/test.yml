@@ -26,19 +26,4 @@ jobs:
     - name: Build Docker Image
       run: docker-compose build
     - name: Run Containers
-      run: docker-compose up -d
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.9'
-    - name: Install Test Dependencies
-      run: python -m pip install -r tests/requirements.txt
-    - name: Debug
-      run: docker ps
-    - name: Debug 2
-      run: for i in $(seq 1 10000); do curl http://localhost:8080/healthz || sleep 1; done
-    - name: Run Tests
-      run: pytest -v
-      env:
-        TEST_URL: http://localhost:8080
-        TEST_DSN: postgres://${{ secrets.DB_NAME }}:${{ secrets.DB_PASS }}@localhost/hord?sslmode=disable
+      run: docker-compose run --rm tests
