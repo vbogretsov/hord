@@ -42,8 +42,8 @@ jobs:
     #     TEST_DSN: postgres://hord:${{ secrets.DB_PASS }}@db/hord?sslmode=disable
     #     TEST_URL: http://app:8080
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+    # - name: Checkout
+    #   uses: actions/checkout@v2
     - name: Debug Postgres
       run: for i in $(seq 1 50); do docker ps | grep postgres | awk '{print $1}' | xargs -I % docker exec % psql -l && sleep 1; done
     # - name: Install dependencies
