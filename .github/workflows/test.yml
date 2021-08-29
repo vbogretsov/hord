@@ -18,6 +18,9 @@ jobs:
           DB_NAME: hord
           DB_USER: ${{ secrets.DB_USER }}
           DB_PASS: ${{ secrets.DB_PASS }}
+          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          PGUSER: postgres
+          PGHOST: localhost
         volumes:
         - /home/runner/work/hord/.local/db:/docker-entrypoint-initdb.d
       app:
@@ -42,7 +45,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Debug Postgres
-      run: for i in $(seq 1 50); do docker ps | grep postgres | awk '{print $1}' | xargs docker logs && sleep 1; done
+      run: for i in $(seq 1 50); do docker ps | grep postgres | awk '{print $1}' | xargs -I % docker exec psql -l && sleep 1; done
     - name: Debug Hasura
       run: for i in $(seq 1 50); do docker ps | grep hasura | awk '{print $1}' | xargs docker logs && sleep 1; done
     # - name: Debug
