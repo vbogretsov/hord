@@ -25,5 +25,5 @@ jobs:
       uses: actions/checkout@v2
     - name: Build Docker Image
       run: docker-compose build
-    - name: Run Containers
+    - name: Run Tests
       run: docker-compose run --rm tests
