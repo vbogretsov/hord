@@ -9,34 +9,34 @@ on:
 jobs:
   test:
     runs-on: ubuntu-20.04
-    # services:
-    #   db:
-    #     image: postgres:13
-    #     env:
-    #       POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-    #       HASURA_METADATA_DB: hasura
-    #       DB_NAME: hord
-    #       DB_USER: ${{ secrets.DB_USER }}
-    #       DB_PASS: ${{ secrets.DB_PASS }}
-    #     volumes:
-    #     - ./.local/db:/docker-entrypoint-initdb.d
-    #   hord:
-    #     image: hasura/graphql-engine:v2.0.7.cli-migrations-v3
-    #     env:
-    #       HASURA_GRAPHQL_DATABASE_URL: postgres://${{ secrets.DB_NAME }}:${{ secrets.DB_PASS }}@db/hord?sslmode=disable
-    #       HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://${{ secrets.DB_NAME }}:${{ secrets.DB_PASS }}@db/hasura?sslmode=disable
-    #       HASURA_GRAPHQL_ENABLE_CONSOLE: false
-    #       HASURA_GRAPHQL_ADMIN_SECRET: ${{ secrets.HASURA_GRAPHQL_ADMIN_SECRET }}
-    #       HASURA_GRAPHQL_JWT_SECRET: ${{ secrets.HASURA_GRAPHQL_JWT_SECRET }}
-    #     volumes:
-    #     - ./migrations:/hasura-migrations
-    #     - ./metadata:/hasura-metadata
-    # container:
-    #   image: python:3.9-slim-buster
-    #   env:
-    #     HASURA_GRAPHQL_JWT_SECRET: ${HASURA_GRAPHQL_JWT_SECRET}
-    #     TEST_DSN: postgres://${{ secrets.DB_NAME }}:${{ secrets.DB_PASS }}@db/hord?sslmode=disable
-    #     TEST_URL: http://hord:8080
+    services:
+      db:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          HASURA_METADATA_DB: hasura
+          DB_NAME: hord
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+        volumes:
+        - /home/runner/work/hord/.local/db:/docker-entrypoint-initdb.d
+      hord:
+        image: hasura/graphql-engine:v2.0.7.cli-migrations-v3
+        env:
+          HASURA_GRAPHQL_DATABASE_URL: postgres://${{ secrets.DB_NAME }}:${{ secrets.DB_PASS }}@db/hord?sslmode=disable
+          HASURA_GRAPHQL_METADATA_DATABASE_URL: postgres://${{ secrets.DB_NAME }}:${{ secrets.DB_PASS }}@db/hasura?sslmode=disable
+          HASURA_GRAPHQL_ENABLE_CONSOLE: false
+          HASURA_GRAPHQL_ADMIN_SECRET: ${{ secrets.HASURA_GRAPHQL_ADMIN_SECRET }}
+          HASURA_GRAPHQL_JWT_SECRET: ${{ secrets.HASURA_GRAPHQL_JWT_SECRET }}
+        volumes:
+        - /home/runner/work/hord/migrations:/hasura-migrations
+        - /home/runner/work/hord/metadata:/hasura-metadata
+    container:
+      image: python:3.9-slim-buster
+      env:
+        HASURA_GRAPHQL_JWT_SECRET: ${HASURA_GRAPHQL_JWT_SECRET}
+        TEST_DSN: postgres://${{ secrets.DB_NAME }}:${{ secrets.DB_PASS }}@db/hord?sslmode=disable
+        TEST_URL: http://hord:8080
     steps:
     - name: Checkout
       uses: actions/checkout@v2
