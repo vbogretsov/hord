@@ -42,7 +42,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Debug
-      run: for i in $(seq 1 50); do docker ps | grep hasura | awk '{print $1}' | dockr logs && sleep 1; done
+      run: for i in $(seq 1 50); do docker ps | grep hasura | awk '{print $1}' | docker logs && sleep 1; done
     # - name: Debug
     #   run: pwd
     # - name: Install dependencies
