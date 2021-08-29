@@ -31,7 +31,7 @@ jobs:
         volumes:
         - /home/runner/work/hord/migrations:/hasura-migrations
         - /home/runner/work/hord/metadata:/hasura-metadata
-        options: --health-cmd "nc -vz localhost 8080" --health-interval 10s --health-timeout 5s --health-retries 20 --health-start-period 120s
+        options: --health-cmd "nc -vz localhost 8080" --health-interval 10s --health-timeout 5s --health-retries 60 --health-start-period 60s
     container:
       image: python:3.9-slim-buster
       env:
