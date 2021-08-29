@@ -35,16 +35,18 @@ jobs:
         - ${{ github.workspace }}/migrations:/hasura-migrations
         - ${{ github.workspace }}/metadata:/hasura-metadata
         # options: --health-cmd "nc -vz localhost 8080" --health-interval 10s --health-timeout 5s --health-retries 60 --health-start-period 60s
-    container:
-      image: python:3.9-slim-buster
-      env:
-        HASURA_GRAPHQL_JWT_SECRET: ${{ secrets.HASURA_GRAPHQL_JWT_SECRET }}
-        TEST_DSN: postgres://hord:${{ secrets.DB_PASS }}@db/hord?sslmode=disable
-        TEST_URL: http://app:8080
+    # container:
+    #   image: python:3.9-slim-buster
+    #   env:
+    #     HASURA_GRAPHQL_JWT_SECRET: ${{ secrets.HASURA_GRAPHQL_JWT_SECRET }}
+    #     TEST_DSN: postgres://hord:${{ secrets.DB_PASS }}@db/hord?sslmode=disable
+    #     TEST_URL: http://app:8080
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Install dependencies
-      run: pip install -r tests/requirements.txt
-    - name: Run tests
-      run: pytest
+    - name: Debug Postgres
+      run: for i in $(seq 1 50); do docker ps | grep postgres | awk '{print $1}' | xargs -I % docker exec % psql -l && sleep 1; done
+    # - name: Install dependencies
+    #   run: pip install -r tests/requirements.txt
+    # - name: Run tests
+    #   run: pytest
