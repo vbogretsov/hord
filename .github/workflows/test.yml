@@ -34,7 +34,7 @@ jobs:
     container:
       image: python:3.9-slim-buster
       env:
-        HASURA_GRAPHQL_JWT_SECRET: ${HASURA_GRAPHQL_JWT_SECRET}
+        HASURA_GRAPHQL_JWT_SECRET: ${{ secrets.HASURA_GRAPHQL_JWT_SECRET }}
         TEST_DSN: postgres://${{ secrets.DB_NAME }}:${{ secrets.DB_PASS }}@db/hord?sslmode=disable
         TEST_URL: http://hord:8080
     steps:
