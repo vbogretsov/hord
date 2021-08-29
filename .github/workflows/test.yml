@@ -45,7 +45,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Debug Postgres
-      run: for i in $(seq 1 100); do docker ps | grep postgres | awk '{print $1}' | xargs -I % docker exec % psql -l && sleep 1; done
+      run: for i in $(seq 1 100); do docker ps | grep postgres | awk '{print $1}' | xargs -I % docker exec % cat /docker-entrypoint-initdb.d/init.sh && sleep 1; done
     - name: Debug Hasura
       run: for i in $(seq 1 50); do docker ps | grep hasura | awk '{print $1}' | xargs docker logs && sleep 1; done
     # - name: Debug
