@@ -22,7 +22,7 @@ jobs:
           PGUSER: postgres
           PGHOST: localhost
         volumes:
-        - /home/runner/work/hord/db/init.sh:/docker-entrypoint-initdb.d/init.sh
+        - ${{ github.workspace }}/db/init.sh:/docker-entrypoint-initdb.d/init.sh
       app:
         image: hasura/graphql-engine:v2.0.7.cli-migrations-v3
         env:
@@ -32,29 +32,19 @@ jobs:
           HASURA_GRAPHQL_ADMIN_SECRET: ${{ secrets.HASURA_GRAPHQL_ADMIN_SECRET }}
           HASURA_GRAPHQL_JWT_SECRET: ${{ secrets.HASURA_GRAPHQL_JWT_SECRET }}
         volumes:
-        - /home/runner/work/hord/migrations:/hasura-migrations
-        - /home/runner/work/hord/metadata:/hasura-metadata
+        - ${{ github.workspace }}/migrations:/hasura-migrations
+        - ${{ github.workspace }}/metadata:/hasura-metadata
         # options: --health-cmd "nc -vz localhost 8080" --health-interval 10s --health-timeout 5s --health-retries 60 --health-start-period 60s
-    # container:
-    #   image: python:3.9-slim-buster
-    #   env:
-    #     HASURA_GRAPHQL_JWT_SECRET: ${{ secrets.HASURA_GRAPHQL_JWT_SECRET }}
-    #     TEST_DSN: postgres://hord:${{ secrets.DB_PASS }}@db/hord?sslmode=disable
-    #     TEST_URL: http://app:8080
+    container:
+      image: python:3.9-slim-buster
+      env:
+        HASURA_GRAPHQL_JWT_SECRET: ${{ secrets.HASURA_GRAPHQL_JWT_SECRET }}
+        TEST_DSN: postgres://hord:${{ secrets.DB_PASS }}@db/hord?sslmode=disable
+        TEST_URL: http://app:8080
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Debug 1
-      run: ls -lR .
-    - name: Debug init.sh 2
-      run: cat ${{ github.workspace }}/db/init.sh
-    - name: Debug Postgres
-      run: for i in $(seq 1 100); do docker ps | grep postgres | awk '{print $1}' | xargs -I % docker exec % ls /docker-entrypoint-initdb.d && sleep 1; done
-    - name: Debug Hasura
-      run: for i in $(seq 1 50); do docker ps | grep hasura | awk '{print $1}' | xargs docker logs && sleep 1; done
-    # - name: Debug
-    #   run: pwd
-    # - name: Install dependencies
-    #   run: pip install -r tests/requirements.txt
-    # - name: Run tests
-    #   run: pytest
+    - name: Install dependencies
+      run: pip install -r tests/requirements.txt
+    - name: Run tests
+      run: pytest
