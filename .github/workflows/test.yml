@@ -47,7 +47,7 @@ jobs:
     - name: Debug 1
       run: ls -lR .
     - name: Debug init.sh 2
-      run: cat /home/runner/work/hord/db/init.sh
+      run: cat init.sh
     - name: Debug Postgres
       run: for i in $(seq 1 100); do docker ps | grep postgres | awk '{print $1}' | xargs -I % docker exec % ls /docker-entrypoint-initdb.d && sleep 1; done
     - name: Debug Hasura
