@@ -25,5 +25,7 @@ jobs:
       uses: actions/checkout@v2
     - name: Build Docker Image
       run: docker-compose build
-    - name: Run Tests
-      run: docker-compose run --rm tests
+    # - name: Run Tests
+    #   run: docker-compose run --rm tests
+    - name: Debug
+      run: for i in $(seq 1 100); do docker ps && sleep 1; done
