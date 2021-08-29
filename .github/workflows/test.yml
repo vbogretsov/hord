@@ -45,7 +45,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Debug init.sh
-      run: ls /home/runner/work/hord/.local/db/init.sh
+      run: cat /home/runner/work/hord/.local/db/init.sh
     - name: Debug Postgres
       run: for i in $(seq 1 100); do docker ps | grep postgres | awk '{print $1}' | xargs -I % docker exec % ls /docker-entrypoint-initdb.d && sleep 1; done
     - name: Debug Hasura
