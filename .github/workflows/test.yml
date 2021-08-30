@@ -22,7 +22,7 @@ jobs:
           # PGUSER: postgres
           # PGHOST: localhost
         volumes:
-        - ${{ github.workspace }}/db/:/docker-entrypoint-initdb.d/
+        - ${{ github.workspace }}/db/init.sh:/docker-entrypoint-initdb.d/1-init.sh
       app:
         image: hasura/graphql-engine:v2.0.7.cli-migrations-v3
         env:
