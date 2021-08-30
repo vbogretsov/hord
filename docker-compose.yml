@@ -3,40 +3,44 @@ version: '3.8'
 services:
 
   db:
-    image: postgres:13
+    image: hord-db
+    build: db
     container_name: hord-db
     ports:
     - 5432:5432
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      HASURA_METADATA_DB: ${HASURA_METADATA_DB}
-      DB_NAME: ${DB_NAME}
-      DB_USER: ${DB_USER}
-      DB_PASS: ${DB_PASS}
-      HASURA_GRAPHQL_ADMIN_SECRET: ${{ secrets.HASURA_GRAPHQL_ADMIN_SECRET }}
+    - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    - HASURA_METADATA_DB=${HASURA_METADATA_DB}
+    - DB_NAME=${DB_NAME}
+    - DB_USER=${DB_USER}
+    - DB_PASS=${DB_PASS}
 
-    volumes:
-    - ./.local/db:/docker-entrypoint-initdb.d
-    - data:/var/lib/postgresql/data
+  hord-ctl:
+    image: hord-ctl
+    build: .
+    restart: on-failure
+    container_name: hord-ctl
+    environment:
+    - HASURA_GRAPHQL_DATABASE_URL=${HASURA_GRAPHQL_DATABASE_URL}
+    - HASURA_GRAPHQL_METADATA_DATABASE_URL=${HASURA_GRAPHQL_METADATA_DATABASE_URL}
+    - HASURA_GRAPHQL_ENABLE_CONSOLE=false
+    - HASURA_GRAPHQL_ADMIN_SECRET=${HASURA_GRAPHQL_ADMIN_SECRET}
+    - HASURA_GRAPHQL_JWT_SECRET=${HASURA_GRAPHQL_JWT_SECRET}
+    - HASURA_GRAPHQL_ENDPOINT=http://hord-app:8080
+    depends_on:
+    - db
 
-  hord:
-    image: hasura/graphql-engine:v2.0.7.cli-migrations-v3
-    restart: always
-    container_name: hord
-    hostname: hord
+  hord-app:
+    image: hasura/graphql-engine:v2.0.7
+    restart: on-failure
+    container_name: hord-app
     ports:
     - 8080:8080
     environment:
     - HASURA_GRAPHQL_DATABASE_URL=${HASURA_GRAPHQL_DATABASE_URL}
     - HASURA_GRAPHQL_METADATA_DATABASE_URL=${HASURA_GRAPHQL_METADATA_DATABASE_URL}
-    - HASURA_GRAPHQL_ENABLE_CONSOLE=false
-    - HASURA_GRAPHQL_ADMIN_SECRET=${HORD_SECRET_KEY}
+    - HASURA_GRAPHQL_ENABLE_CONSOLE=true
+    - HASURA_GRAPHQL_ADMIN_SECRET=${HASURA_GRAPHQL_ADMIN_SECRET}
     - HASURA_GRAPHQL_JWT_SECRET=${HASURA_GRAPHQL_JWT_SECRET}
-    volumes:
-    - ./migrations:/hasura-migrations
-    - ./metadata:/hasura-metadata
     depends_on:
-    - db
-
-volumes:
-  data: {}
+    - hord-ctl
