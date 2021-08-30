@@ -46,7 +46,7 @@ jobs:
     #   uses: actions/checkout@v2
     - name: Debug Postgres
       # run: for i in $(seq 1 50); do docker ps | grep postgres | awk '{print $1}' | xargs -I % docker exec % psql -l && sleep 1; done
-      run: run: for i in $(seq 1 50); do docker ps && sleep 1; done
+      run: for i in $(seq 1 50); do docker ps && sleep 1; done
     # - name: Install dependencies
     #   run: pip install -r tests/requirements.txt
     # - name: Run tests
